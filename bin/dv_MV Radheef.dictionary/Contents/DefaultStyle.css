@@ -1,0 +1,35 @@
+@charset "UTF-8";
+@namespace d url(http://www.apple.com/DTDs/DictionaryService-1.0.rng);
+
+d|entry {
+}
+
+h1	{
+	color: #565656;
+	font-size: 150%;
+}
+
+h3	{
+	font-size: 100%;
+}
+
+.align_right {
+  direction: rtl;
+  text-align: right;
+  unicode-bidi: bidi-override;
+}
+
+span.word_class {
+  display:block;
+  color: #9e9e9e
+}
+
+span.column {
+	display: block;
+	border: solid 2px #c0c0c0;
+	margin-left: 2em;
+	margin-right: 2em;
+	margin-top: 0.5em;
+	margin-bottom: 0.5em;
+	padding: 0.5em;
+}

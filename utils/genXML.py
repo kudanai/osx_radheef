@@ -52,17 +52,23 @@ def main():
         # start creating entries.
         # REF etree XPath: root.findall("//target[@name='a']"):
         for row in dbCur:
+            
+            headWord = row[0]                   # the headword
+            headWordr = stringReverse(headWord) # safe-reversed headword
+            headBas = asciiUTF(headWord)        # thaana headword
+            
+            
             # <d:entry id="unique_id" d:title="display">
-            dictEntry = SubElement(radheef,"d:entry",{'id':cleanupID(stringReverse(row[0])),'d:title':asciiUTF(row[0])})
+            dictEntry = SubElement(radheef,"d:entry",{'id':cleanupID(headWordr),'d:title':headBas})
             
             # <d:index d:value="indexVal" d:title="displayTitle" />
             # we create two here, for thaana and also, ascii search
               
               # entry one: TODO safe string reverse d:value
-            SubElement(dictEntry,"d:index",{'d:value':stringReverse(row[0]),'d:title':asciiUTF(row[0])})
+            SubElement(dictEntry,"d:index",{'d:value':headWordr,'d:title':headBas})
     
               # entry two: thaana thaana
-            SubElement(dictEntry,"d:index",{'d:value':asciiUTF(row[0]),'d:title':asciiUTF(row[0])})
+            SubElement(dictEntry,"d:index",{'d:value':headBas,'d:title':headBas})
 
     
     print tostring(radheef)

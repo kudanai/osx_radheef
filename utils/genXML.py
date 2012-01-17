@@ -14,6 +14,7 @@
 
 import sqlite3
 import re
+import string
 from xml.etree.ElementTree import ElementTree,Element,SubElement,Comment,tostring
 from pyThaana.conversions import ThaanaConversions
 
@@ -23,6 +24,10 @@ XML_OUTPUT = "output.xml"
 
 # init the Thaana conversion library as a global object
 convert = ThaanaConversions()
+
+# init translation table for later use..not sure if we need this
+# this will fix brackts in the revstring routine
+tTable = string.maketrans('()[]{}',')(][}{')
 
 
 def main():
@@ -44,13 +49,13 @@ def main():
     # connect to the database
     with sqlite3.connect(SQLITE_DB) as dbConn:
         dbCur = dbConn.cursor()
+        hitList = []                # an empty list to hold the headwords already parsed
         
         # THOUGHT: should I group by headword and concat the defs?
         # that might simplify a few things
-        dbCur.execute('SELECT * FROM radheef LIMIT 20')
+        dbCur.execute('SELECT * FROM radheef')
         
         # start creating entries.
-        # REF etree XPath: root.findall("//target[@name='a']"):
         for row in dbCur:
             
             headWord = row[0]                   # the headword
@@ -58,21 +63,56 @@ def main():
             headBas = asciiUTF(headWord)        # thaana headword
             
             
-            # <d:entry id="unique_id" d:title="display">
-            dictEntry = SubElement(radheef,"d:entry",{'id':cleanupID(headWordr),'d:title':headBas})
+            # find out if the definition already exists
+            # XPATH ".//d:entry[@id='%s']" % cleanupID(headwordR)
+            # Using find on each row is going to be ridiculously slow
+            # using the hitList as a temporary stepAround until a solution can be found
             
-            # <d:index d:value="indexVal" d:title="displayTitle" />
-            # we create two here, for thaana and also, ascii search
-              
-              # entry one: TODO safe string reverse d:value
-            SubElement(dictEntry,"d:index",{'d:value':headWordr,'d:title':headBas})
-    
-              # entry two: thaana thaana
-            SubElement(dictEntry,"d:index",{'d:value':headBas,'d:title':headBas})
+            if headWord in hitList:
+                dictEntry=radheef.find(".//*[@id='%s']" % cleanupID(headWordr))
+                defn=dictEntry.find("div")
+                
+                #debug:
+                print "found %s so reusing the node" % headWord
+            
+            # <d:entry id="unique_id" d:title="display">
+            else:
+                dictEntry = SubElement(radheef,"d:entry",{'id':cleanupID(headWordr),'d:title':headBas})
+                
+                # we want it on the hitlist
+                hitList.append(headWord)
+            
+                # <d:index d:value="indexVal" d:title="displayTitle" />
+                # we create two here, for thaana and also, ascii search
+                
+                SubElement(dictEntry,"d:index",{'d:value':headWordr,'d:title':headBas})
+                SubElement(dictEntry,"d:index",{'d:value':headBas,'d:title':headBas})
 
+                # Top Level align-right container
+                defn = SubElement(dictEntry,"div",{'class':'align_right'})
+                SubElement(defn,"h1").text=headBas
+
+        
+
+        
+                    
+            defn.append(makeDef(headBas,row[1],row[2]))
+            
     
-    print tostring(radheef)
+
+    # debug
+    # print tostring(radheef)
     writeToFile(radheef)
+
+def makeDef(headBas,wordType,definition):
+    em = Element("div",{'class':'definition'})
+
+    if wordType:
+        SubElement(em,"span",{'class':'word_class'}).text=asciiUTF(wordType)
+    
+    SubElement(em,"p").text=asciiUTF(definition)
+
+    return em
 
 
 def asciiUTF(ascString):
@@ -87,7 +127,14 @@ def cleanupID(idString):
 
 def stringReverse(rString):
     # TODO: make it number safe and other do-hickeys
-    return rString[::-1]
+    # re /([\d+\.,:]+)/
+    
+    # blind reverse and translate brackets
+    rString = rString.encode('ascii')
+    rev = rString[::-1].translate(tTable)
+    
+    #oof! reverse numbers and spit it out
+    return re.sub(r"([0-9\,.:]+)",lambda m:m.group(0)[::-1],rev)
 
 
 def writeToFile(rootElement):

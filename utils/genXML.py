@@ -93,8 +93,6 @@ def main():
                 SubElement(defn,"h1").text=headBas
 
         
-
-        
                     
             defn.append(makeDef(headBas,row[1],row[2]))
             

@@ -19,7 +19,7 @@ from xml.etree.ElementTree import ElementTree,Element,SubElement,Comment,tostrin
 from pyThaana.conversions import ThaanaConversions
 
 SQLITE_DB = "radheef.sqlite3"
-XML_OUTPUT = "output.xml"
+XML_OUTPUT = "Radheef.xml"
 
 
 # init the Thaana conversion library as a global object
@@ -108,9 +108,29 @@ def makeDef(headBas,wordType,definition):
     if wordType:
         SubElement(em,"span",{'class':'word_class'}).text=asciiUTF(wordType)
     
-    SubElement(em,"p").text=asciiUTF(definition)
+    # parse the definition for some nice stuff
+    # and append it here
+    em.append(parseDef(definition))
 
     return em
+
+
+def parseDef(definition):
+    """
+        do some parsing on the definitions, like stripping those
+        ugly (1),(2) type seperators to a proper ordered list
+    """
+    
+    rev = stringReverse(definition)
+    explode = re.sub(r"\(\d+\)","\n",rev).strip()
+    
+    dlist = Element("ul")
+    
+    for line in explode.split("\n"):
+        SubElement(dlist,"li").text=asciiUTF(stringReverse(line.strip()))
+
+    return dlist
+    
 
 
 def asciiUTF(ascString):

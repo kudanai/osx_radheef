@@ -1,7 +1,21 @@
 #!/usr/bin/env python
 
+##############################################################################
+#
+# This is a utility script to import data from radheef.csv to an sqlite3
+# database. Future implementations of XML generation routines should use
+# the db instead of the csv file.
+#
+# 2012 - kudanai (http://kudanai.com)
+#
+##############################################################################
+
+
 import sqlite3
 import csv
+
+#we're assuming that radheef.csv is in here somewhere
+#note the csv is actuall tab-delimited
 
 csvReader = csv.DictReader(open('radheef.csv','rb'),delimiter="\t",fieldnames=('word','meaning','type'),restval="")
 
@@ -22,3 +36,6 @@ with sqlite3.connect('radheef.sqlite3') as conn:
         
         #insert the data
         cur.execute('INSERT INTO radheef VALUES (?,?,?)',dictEntry)
+
+## end with. 
+## commit changes and close connection

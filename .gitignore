@@ -8,3 +8,6 @@ Thumbs.db
 # build directory $
 #####################
 bin/
+
+# ddk #
+ddk/

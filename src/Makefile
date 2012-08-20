@@ -9,7 +9,7 @@
 # You need to edit these values.
 
 DICT_NAME		=	"dv_MV Radheef"
-DICT_SRC_PATH		=	Radheef.xml
+DICT_SRC_PATH	=	Radheef.xml
 CSS_PATH		=	Radheef.css
 PLIST_PATH		=	Info.plist
 
@@ -36,6 +36,11 @@ RM			=	/bin/rm
 ###########################
 
 all:
+	@echo "rebuilding xml"
+	$(RM) -rf ${DICT_SRC_PATH}
+	./genXML.py
+
+	@echo "building dictionary"
 	"$(DICT_BUILD_TOOL_BIN)/build_dict.sh" $(DICT_BUILD_OPTS) $(DICT_NAME) $(DICT_SRC_PATH) $(CSS_PATH) $(PLIST_PATH)
 	echo "Done."
 
@@ -51,4 +56,10 @@ install:
 	echo "To test the new dictionary, try Dictionary.app."
 
 clean:
+	$(RM) -rf $(DICT_SRC_PATH)
 	$(RM) -rf $(DICT_DEV_KIT_OBJ_DIR)
+	../utils/cache_clean.sh
+
+remove:
+	echo "Removing Dictionary"
+	rm -rf ${DESTINATION_FOLDER}/${DICT_NAME}.dictionary

@@ -84,9 +84,8 @@ def main():
             
                 # <d:index d:value="indexVal" d:title="displayTitle" />
                 # we create two here, for thaana and also, ascii search
-                
-                SubElement(dictEntry,"d:index",{'d:value':headWordr,'d:title':headBas})
                 SubElement(dictEntry,"d:index",{'d:value':headBas,'d:title':headBas})
+                SubElement(dictEntry,"d:index",{'d:value':headWordr,'d:title':headBas})
 
                 # Top Level align-right container
                 defn = SubElement(dictEntry,"div",{'class':'align_right'})

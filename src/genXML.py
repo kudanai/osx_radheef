@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: UTF-8 -*-
 
 #######################################################
 #
@@ -18,7 +19,7 @@ import string
 from xml.etree.ElementTree import ElementTree,Element,SubElement,Comment,tostring
 from pyThaana.conversions import ThaanaConversions
 
-SQLITE_DB = "radheef.sqlite3"
+SQLITE_DB = "resources/radheef.sqlite3"
 XML_OUTPUT = "Radheef.xml"
 
 
@@ -84,8 +85,9 @@ def main():
             
                 # <d:index d:value="indexVal" d:title="displayTitle" />
                 # we create two here, for thaana and also, ascii search
-                SubElement(dictEntry,"d:index",{'d:value':headBas,'d:title':headBas})
-                SubElement(dictEntry,"d:index",{'d:value':headWordr,'d:title':headBas})
+                # note: removed d:title doesn't seem necessary. 'd:title':headBas
+                SubElement(dictEntry,"d:index",{'d:value':headBas})
+                SubElement(dictEntry,"d:index",{'d:value':headWordr, 'd:title':headBas})
 
                 # Top Level align-right container
                 defn = SubElement(dictEntry,"div",{'class':'align_right'})

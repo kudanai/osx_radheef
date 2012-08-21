@@ -25,7 +25,13 @@ DICT_BUILD_OPTS		=
 DICT_BUILD_TOOL_DIR	=	"/Developer/Extras/Dictionary Development Kit"
 DICT_BUILD_TOOL_BIN	=	"$(DICT_BUILD_TOOL_DIR)/bin"
 
-###########################
+############################
+
+# Package Maker options
+PACKAGEMAKER_BIN = "/Applications/PackageMaker.app/Contents/MacOS/PackageMaker"
+PACKAGEMAKER_DOC = "./Packaging.pmdoc"
+
+############################
 
 DICT_DEV_KIT_OBJ_DIR	=	../bin
 export	DICT_DEV_KIT_OBJ_DIR
@@ -35,31 +41,39 @@ RM			=	/bin/rm
 
 ###########################
 
-all:
-	@echo "rebuilding xml"
-	$(RM) -rf ${DICT_SRC_PATH}
-	./genXML.py
+all: xml dict package
 
+dict:
 	@echo "building dictionary"
 	"$(DICT_BUILD_TOOL_BIN)/build_dict.sh" $(DICT_BUILD_OPTS) $(DICT_NAME) $(DICT_SRC_PATH) $(CSS_PATH) $(PLIST_PATH)
 	echo "Done."
 
+xml:
+	@echo "rebuilding dictionary source xml"
+	$(RM) -rf $(DICT_SRC_PATH)
+	./genXML.py
+
+
+package:
+	@echo "building installer package"
+	$(PACKAGEMAKER_BIN) --doc $(PACKAGEMAKER_DOC) --out "$(DICT_DEV_KIT_OBJ_DIR)/OSX Radheef.pkg"
+
 
 install:
-        #cleaning the dictionary cache. uncomment the next line to enable
-        #bash ../utils/cache_clean.sh
-	echo "Installing into $(DESTINATION_FOLDER)".
+	@echo "Installing into $(DESTINATION_FOLDER)".
 	mkdir -p $(DESTINATION_FOLDER)
 	ditto --noextattr --norsrc $(DICT_DEV_KIT_OBJ_DIR)/$(DICT_NAME).dictionary  $(DESTINATION_FOLDER)/$(DICT_NAME).dictionary
+	
+	# cleanup dictionary caches
+	./resources/postinstall.sh
+
 	touch $(DESTINATION_FOLDER)
-	echo "Done."
-	echo "To test the new dictionary, try Dictionary.app."
+	@echo "Done."
+	@echo "To test the new dictionary, try Dictionary.app."
 
 clean:
-	$(RM) -rf $(DICT_SRC_PATH)
 	$(RM) -rf $(DICT_DEV_KIT_OBJ_DIR)
-	../utils/cache_clean.sh
 
 remove:
-	echo "Removing Dictionary"
-	rm -rf ${DESTINATION_FOLDER}/${DICT_NAME}.dictionary
+	@echo "Removing Dictionary"
+	$(RM) -rf ${DESTINATION_FOLDER}/${DICT_NAME}.dictionary
